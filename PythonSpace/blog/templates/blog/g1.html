@@ -1,0 +1,39 @@
+{% extends 'blog/base.html' %}
+
+{% block content %}
+    <article class="post">
+        <form method="post" action="">
+            {% csrf_token %}   <!-- 防止跨站攻击 -->
+            <input type="text" id="keyword" name="g"> <!-- 后端通过name拿到数据 -->
+            <div id="suggestions"></div> <!-- 用于显示推荐关键词的div -->
+            <button type="submit">提交</button>
+        </form>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script>
+        $(document).ready(function() {
+            // 初始化推荐关键词列表
+            var suggestions = ["关键词1", "关键词2", "关键词3", "关键词4", "关键词5"];
+            var suggestionDiv = $("#suggestions");
+            suggestionDiv.empty(); // 清空div
+            $.each(suggestions, function(index, suggestion) {
+                $("<button>" + suggestion + "</button>").appendTo(suggestionDiv); // 添加按钮
+            });
+        
+            // 当输入框有变化时，更新推荐关键词列表
+            $("#keyword").on("input", function() {
+                var keyword = $(this).val();
+                // 如果输入框中有内容，就移除空的推荐关键词按钮
+                suggestionDiv.find("button").each(function() {
+                    if ($(this).text().trim() === "") $(this).remove();
+                });
+                // 根据输入内容更新推荐关键词列表
+                $.each(suggestions, function(index, suggestion) {
+                    if (keyword.includes(suggestion)) {
+                        $("<button>" + suggestion + "</button>").appendTo(suggestionDiv);
+                    }
+                });
+            });
+        });
+        </script>
+    </article>
+{% endblock %}

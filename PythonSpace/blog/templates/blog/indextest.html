@@ -1,0 +1,154 @@
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<form method="post" enctype="multipart/form-data" action="{% url 'submit_form' %}">
+  {% csrf_token %}
+  <label for="productid">商品名称</label>
+  <input id="productid" type="text" name="productid"/>
+  <button type="button" id="suggest-btn" onclick="suggestKeywords()">联想</button>
+  <p></p>
+  <label for="add-keyword">关键词</label>
+  <input id="add-keyword" type="text" name="keywords"/>
+  <button type="button" id="add-keyword-btn" onclick="addKeywords()">确定</button>
+  <p></p>
+  <p></p>
+  <br></br>
+  <label for="selected-keywords">关键词</label>
+  <div id="selected-keywords"></div>
+  <input type="hidden" id="selected-keywords-input" name="selected_keywords">
+  <p></p>
+  <label for="account_ids">账户ID:</label><br>
+  <input type="text" id="account_ids" name="account_ids" placeholder="请输入账户ID，以';'分隔，最多5个" ><br>
+  <label for="file">或上传txt文件:</label><br>
+  <input type="file" id="file" name="file" accept="text/plain"><br>
+  <button type="submit" value="提交">提交</button>
+</form>
+<script>
+
+  //功能1：针对商品名称联想关键词
+  var dictArray = [
+    { productid: '好欢螺', keyword: ['螺蛳粉', '加辣','加臭','90后宝妈'] },
+    { productid: '456', keyword: ['orange', 'mango'] },
+    // 其他字典对象...
+  ];
+
+  //如果商品名称的输入在字典里，则开启联想功能，输出置顶关键词
+  function suggestKeywords() {
+    var productid0 = document.getElementById('productid');
+    var productid0value = productid0.value.trim();
+    var result0 = getKeywordsByProductId(productid0value);
+  //如果联想出的关键词不为空才执行函数
+    if (result0 && Array.isArray(result0)) {
+      for (var i = 0; i < result0.length; i++) {
+        if (!isKeywordExist(result0[i])){
+          keywordfn(result0[i]);
+        } 
+      }
+    }
+  }
+
+  //对关键词添加'X'按钮可以手动进行删除
+  function keywordfn(keyword) {
+    var selectedKeywords = document.getElementById('selected-keywords');
+    selectedKeywords.addEventListener("contextmenu", function(event) {
+        event.preventDefault();
+    });
+    var span = document.createElement('span');
+    span.textContent = keyword;
+    var removeBtn = document.createElement('button');
+    removeBtn.textContent = 'X';
+    removeBtn.addEventListener('click', function() {
+      selectedKeywords.removeChild(span);
+    });
+    span.appendChild(removeBtn);
+    selectedKeywords.appendChild(span);
+  }
+  
+  //根据输入查看字典里是否有对应的关键词
+  function getKeywordsByProductId(productId) {
+    var keywords = [];
+    for (var i = 0; i < dictArray.length; i++) {
+      if (dictArray[i].productid === productId) {
+        keywords = dictArray[i].keyword;
+        break;
+      }
+    }
+    return keywords;
+  }
+
+  //功能2：手动输入关键词，以','分隔开
+  //输入，自动补全关键词
+  $( "#add-keyword" ).autocomplete({
+    source: function(request, response) {
+      $.getJSON("/get_keywords/", {
+        term: extractLast(request.term)
+      }, response);
+    },
+    focus: function() {
+      return false;
+    },
+    select: function(event, ui) {
+      var terms = split(this.value);
+      terms.pop();
+      terms.push(ui.item.value);
+      terms.push("");
+      this.value = terms.join(", ");
+      return false;
+    }
+  });
+  function split(val) {
+    return val.split(/,\s*/);
+  }
+  function extractLast(term) {
+  return split(term).pop();
+}
+
+  //对add-keyword输入框当前内容进行定义并应用函数
+  function addKeywords(){
+      var keywordContent = $("#add-keyword").val()
+      var keywords2 = keywordContent.split(',');
+      for (var i = 0; i < keywords2.length; i++) {
+          var keyword = keywords2[i].trim();
+          // 检查关键词是否已存在于textarea中
+          if (keyword !== '' && !isKeywordExist(keyword)) {
+              keywordfn(keyword);
+          }
+      }
+  }
+
+  //查重函数，在输入新关键词之前查看已有词条中是否有重复
+  function isKeywordExist(keyword) {
+      var selectedKeywords = document.getElementById('selected-keywords');
+      var spans = selectedKeywords.getElementsByTagName('span');
+      for (var i = 0; i < spans.length; i++) {
+          if (spans[i].textContent === keyword+'X') {
+              return true;
+          }
+      }
+      return false;
+  }
+
+  //功能3：提交账户id
+  document.getElementById("myForm").addEventListener("submit", function(event) {
+    event.preventDefault(); // 阻止表单默认提交行为
+    var form = event.target; // 获取表单对象
+    var productid = form.elements['productid'].value; // 获取商品名称的值
+    var selectedKeywords = form.elements['selected_keywords'].value; // 获取关键词的值，注意这里需要获取的是隐藏输入框的值，而不是div元素的值
+    var accountIds = form.elements['account_ids'].value; // 获取账户ID的值
+    var file = form.elements['file'].files[0]; // 获取上传的文件对象
+    console.log("Product ID: " + productid); // 在控制台打印商品名称的值
+    console.log("Selected Keywords: " + selectedKeywords); // 在控制台打印关键词的值，注意这里需要将HTML中的标签转换为字符串再打印，因为控制台不能识别HTML标签
+    console.log("Account IDs: " + accountIds); // 在控制台打印账户ID的值
+    if (accountIds && file) { // 检查是否同时输入了账户ID和上传了文件
+        alert('不能同时输入账户ID和上传文件'); // 如果同时输入了账户ID和上传了文件，弹出警告信息
+    } else if (!accountIds && !file) { // 检查是否未输入账户ID或未上传文件
+        alert('请输入账户ID或上传文件'); // 如果未输入账户ID或未上传文件，弹出警告信息
+    } else { // 处理已输入的账户ID和关键词并显示内容到页面上
+        handleAccountIdsAndKeywords(accountIds, selectedKeywords); // 处理已输入的账户ID和关键词，这里需要根据实际需求实现具体逻辑
+    }
+});
+  function handleAccountIdsAndKeywords(accountIds, selectedKeywords) {
+    console.log("已提交的账户ID: " + accountIds); // 在控制台打印已提交的账户ID的值，根据你的实际需求进行处理，例如你可以将这个信息显示在页面上
+    console.log("已选择的关键词: " + selectedKeywords); // 在控制台打印已选择的关键词的值，注意这里需要将HTML中的标签转换为字符串再打印，因为控制台不能识别HTML标签，需要将其替换为真实的关键词内容才能正确显示在页面上。你可以将这部分内容替换到你的HTML代码中需要显示的地方
+  }
+  </script>
+

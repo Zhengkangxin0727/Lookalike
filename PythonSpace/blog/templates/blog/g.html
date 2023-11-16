@@ -1,0 +1,44 @@
+{% extends 'blog/base.html' %}
+
+{% block content %}
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<form method="POST">
+    {% csrf_token %}
+    <input type="text" id="keyword" name="g">
+    <input type="submit" value="Submit">
+</form>
+<script>
+$( "#keyword" ).autocomplete({
+  source: function(request, response) {
+    $.getJSON("/get_keywords/", {
+      term: extractLast(request.term)
+    }, response);
+  },
+  focus: function() {
+    return false;
+  },
+  select: function(event, ui) {
+    var terms = split(this.value);
+    terms.pop();
+    terms.push(ui.item.value);
+    terms.push("");
+    this.value = terms.join(", ");
+    return false;
+  }
+});
+
+function split(val) {
+  return val.split(/,\s*/);
+}
+
+function extractLast(term) {
+  return split(term).pop();
+}
+</script>
+
+{% for keyword in keywords %}
+<p>{{ keyword }}</p>
+{% endfor %}
+
+{% endblock %}

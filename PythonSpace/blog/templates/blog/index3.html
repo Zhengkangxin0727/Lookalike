@@ -1,0 +1,72 @@
+<form method="post" action="{% url 'index3' %}">
+    {% csrf_token %}
+    <input type="text" name="input1" id="input1">
+    <button type="submit" name="联想">联想</button>
+    <br>
+    <input type="text" name="input2" id="input2">
+    <button type="submit" name="确定">确定</button>
+  </form>
+  
+  <div id="keywords">
+    <!-- 这里显示关键词 -->
+  </div>
+  
+  <script>
+    // 处理联想按钮点击事件
+    document.querySelector('button[name="联想"]').addEventListener('click', function(event) {
+      event.preventDefault();
+      var input1 = document.getElementById('input1').value;
+      fetch('{% url "index3" %}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({input1: input1})
+      })
+      .then(response => response.json())
+      .then(data => {
+        var keywordsDiv = document.getElementById('keywords');
+        keywordsDiv.innerHTML = '';
+        data.suggestions.forEach(function(suggestion) {
+          var keywordSpan = document.createElement('span');
+          keywordSpan.textContent = suggestion;
+          keywordSpan.classList.add('keyword');
+          keywordSpan.addEventListener('click', function() {
+            this.remove();
+          });
+          keywordsDiv.appendChild(keywordSpan);
+        });
+      });
+    });
+  
+    // 处理确定按钮点击事件
+    document.querySelector('button[name="确定"]').addEventListener('click', function(event) {
+      event.preventDefault();
+      var input2 = document.getElementById('input2').value;
+      fetch('{% url "index3" %}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({input2: input2})
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          var keywordsDiv = document.getElementById('keywords');
+          var keywords = input2.split(',');
+          keywords.forEach(function(keyword) {
+            var keywordSpan = document.createElement('span');
+            keywordSpan.textContent = keyword.trim();
+            keywordSpan.classList.add('keyword');
+            keywordSpan.addEventListener('click', function() {
+              this.remove();
+            });
+            keywordsDiv.appendChild(keywordSpan);
+          });
+        }
+      });
+    });
+  </script>

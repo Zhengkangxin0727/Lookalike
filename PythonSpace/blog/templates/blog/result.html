@@ -1,0 +1,11 @@
+<!-- result.html -->
+<h2>提交成功！</h2>
+<p>商品名称：{{ product_name }}</p>
+<p>关键词：{{ keyword }}</p>
+<p>账户ID：</p>
+<ul>
+  {% for account_id in account_ids %}
+    <li>{{ account_id }}</li>
+  {% endfor %}
+</ul>
+

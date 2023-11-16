@@ -1,0 +1,23 @@
+{% extends 'blog/base.html' %}
+
+{% block content %}
+<!-- templates/index.html -->
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <label for="account_ids">账户ID:</label><br>
+    <input type="text" id="account_ids" name="account_ids" placeholder="请输入账户ID，以';'分隔，最多5个"><br>
+    <label for="file">或上传txt文件:</label><br>
+    <input type="file" id="file" name="file"><br>
+    <input type="submit" value="提交">
+</form>
+
+{% if account_ids %}
+    <h2>你输入的账户ID:</h2>
+    <ul>
+        {% for account_id in account_ids %}
+            <li>{{ account_id }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+{% endblock %}

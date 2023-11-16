@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Index2</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <form method="post">
+        {% csrf_token %}
+        <label for="product_name">商品名称:</label>
+        <input type="text" id="product_name" name="product_name">
+        <button type="button" id="suggestion_button">联想</button>
+        <select id="suggestion_box" multiple></select>
+
+        <br><br>
+
+        <label for="keyword_input">Keyword0:</label>
+        <input type="text" id="keyword_input" name="keyword_input">
+        <button type="button" id="recommend_button">确定</button>
+        <select id="selected_keywords" multiple></select>
+
+        <br><br>
+
+        <label for="account_ids">账户id:</label>
+        <input type="text" id="account_ids" name="account_ids">
+
+        <br><br>
+
+        <input type="submit" value="提交">
+    </form>
+
+    <br><br>
+
+    <h3>提交结果:</h3>
+    <p>商品名称: {{ product_name }}</p>
+    <p>选择框A关键词: {{ selected_keywords }}</p>
+    <p>账户id: {{ account_ids }}</p>
+
+    <script>
+        $(document).ready(function() {
+            // 功能1：联想按钮点击事件
+            $('#suggestion_button').click(function() {
+                // 发送AJAX请求获取关键词
+                $.ajax({
+                    url: '/get_suggestions/',
+                    type: 'GET',
+                    success: function(response) {
+                        // 清空选择框A
+                        $('#suggestion_box').empty();
+                        // 将关键词添加到选择框A
+                        response.forEach(function(keyword) {
+                            $('#suggestion_box').append('<option>' + keyword + '</option>');
+                        });
+                    }
+                });
+            });
+
+            // 功能2：确定按钮点击事件
+            $('#recommend_button').click(function() {
+                var keywords = $('#keyword_input').val().split(',');
+                // 发送AJAX请求获取推荐关键词
+                $.ajax({
+                    url: '/get_recommendations/',
+                    type: 'POST',
+                    data: {keywords: keywords},
+                    success: function(response) {
+                        // 清空选择框A
+                        $('#selected_keywords').empty();
+                        // 将推荐关键词添加到选择框A
+                        response.forEach(function(keyword) {
+                            $('#selected_keywords').append('<option>' + keyword + '</option>');
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

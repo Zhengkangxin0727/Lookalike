@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Object-oriented JavaScript example</title>
+  </head>
+
+  <body>
+    <p>This example requires you to enter commands in your browser's JavaScript console (see <a href="https://developer.mozilla.org/en-US/docs/Learn/Common_questions/What_are_browser_developer_tools">What are browser developer tools</a> for more information).</p>
+    
+    <script>
+        const person = {
+            name: ["Bob", "Smith"],
+            age: 32,
+            bio: function () {
+                console.log(`${this.name[0]} ${this.name[1]} 现在 ${this.age} 岁了。`);
+            },
+            introduceSelf: function () {
+                console.log(`你好！我是 ${this.name[0]}。`);
+            },
+            };
+        const myDataName = "height";
+        const myDataValue = "1.75m";
+        person[myDataName] = myDataValue;
+
+        function Person(name) {
+            this.name = name;
+            this.introduceSelf = function () {
+                console.log(`你好！我是 ${this.name}。`);
+            };
+        }
+
+        const salva = new Person("Salva");
+        salva.name;
+        salva.introduceSelf();
+        // "你好！我是 Salva。"
+
+        const frankie = new Person("Frankie");
+        frankie.name;
+        frankie.introduceSelf();
+        // "你好！我是 Frankie。"
+
+        const myObject = {
+        city: "Madrid",
+        greet() {
+            console.log(`来自 ${this.city} 的问候`);
+        },
+        };
+        myObject.greet(); // 来自 Madrid 的问候
+
+
+
+
+
+    </script>
+  </body>
+
+</html>

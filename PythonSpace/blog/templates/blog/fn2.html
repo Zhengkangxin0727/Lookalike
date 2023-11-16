@@ -1,0 +1,54 @@
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="确定">
+</form>
+<div id="selected-keywords"></div>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script>
+$( "#id_keyword" ).autocomplete({
+  source: function(request, response) {
+    $.getJSON("/get_keywords/", {
+      term: extractLast(request.term)
+    }, response);
+  },
+  focus: function() {
+    return false;
+  },
+  select: function(event, ui) {
+    var terms = split(this.value);
+    terms.pop();
+    terms.push(ui.item.value);
+    terms.push("");
+    this.value = terms.join(", ");
+    return false;
+  }
+});
+
+function split(val) {
+  return val.split(/,\s*/);
+}
+
+function extractLast(term) {
+  return split(term).pop();
+}
+
+document.getElementById('add-keyword-btn').addEventListener('click', function() {
+  var keywordInput = document.getElementById('id_keyword');
+  var selectedKeywords = document.getElementById('selected-keywords');
+  var keyword = keywordInput.value.trim();
+  if (keyword) {
+    var span = document.createElement('span');
+    span.textContent = keyword;
+    var removeBtn = document.createElement('button');
+    removeBtn.textContent = 'X';
+    removeBtn.addEventListener('click', function() {
+      selectedKeywords.removeChild(span);
+    });
+    span.appendChild(removeBtn);
+    selectedKeywords.appendChild(span);
+    keywordInput.value = '';
+  }
+});
+</script>

@@ -1,0 +1,19 @@
+{% extends 'blog/base.html' %}
+
+{% block content %}
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">提交</button>
+</form>
+
+{% if account_ids %}
+    <h2>账户ID:</h2>
+    <ul>
+        {% for id in account_ids %}
+            <li>{{ id }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+{% endblock %}

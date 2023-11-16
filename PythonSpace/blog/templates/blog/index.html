@@ -1,0 +1,74 @@
+<!-- index.html -->
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ product_form.as_p }}
+    <button type="button" id="suggest-btn">联想</button>
+    <textarea id="keyword"></textarea>
+
+    <!-- <select id="suggestions" multiple></select> 一个选择框 -->
+    {{ keyword_form.as_p }}
+    <button type="button" id="add-keyword-btn">确定</button>
+    <div id="selected-keywords"></div>
+    {{ account_form.as_p }}
+    <button type="submit">提交</button>
+  </form>
+  
+  <script>
+    // 联想按钮点击事件
+    // document.getElementById('suggest-btn').addEventListener('click', function() {
+    //   // 在这里调用生成关键词的逻辑，将生成的关键词填充到选择框中
+    //   var suggestions = ['关键词1', '关键词2', '关键词3'];
+    //   var select = document.getElementById('suggestions');
+    //   select.innerHTML = '';
+    //   for (var i = 0; i < suggestions.length; i++) {
+    //     var option = document.createElement('option');
+    //     option.text = suggestions[i];
+    //     select.add(option);
+    //   }
+    // });
+
+    //联想按钮新写一个
+    document.getElementById('suggest-btn').addEventListener('click', function() {
+      // 在这里调用生成关键词的逻辑，将生成的关键词填充到选择框中
+      var suggestions = ['关键词1', '关键词2', '关键词3'];
+      var select = document.getElementById('keyword');
+      select.innerHTML = '';
+      for (var i = 0; i < suggestions.length; i++) {
+        var option = document.createElement('span');
+        option.textContent = suggestions[i];
+        select.add(option);
+      }
+    });
+  
+    // 确定按钮点击事件
+    document.getElementById('add-keyword-btn').addEventListener('click', function() {
+      var keywordInput = document.getElementById('id_keyword');
+      var selectedKeywords = document.getElementById('selected-keywords');
+      var keyword = keywordInput.value.trim();
+      if (keyword) {
+        var span = document.createElement('span');
+        span.textContent = keyword;
+        var removeBtn = document.createElement('button');
+        removeBtn.textContent = 'X';
+        removeBtn.addEventListener('click', function() {
+          selectedKeywords.removeChild(span);
+        });
+        span.appendChild(removeBtn);
+        selectedKeywords.appendChild(span);
+        keywordInput.value = '';
+      }
+    });
+  
+    // 文件选择事件
+    document.getElementById('account-file').addEventListener('change', function(event) {
+      var file = event.target.files[0];
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var contents = e.target.result;
+        // 在这里处理文件内容
+        console.log(contents);
+      };
+      reader.readAsText(file);
+    });
+  </script>
+
